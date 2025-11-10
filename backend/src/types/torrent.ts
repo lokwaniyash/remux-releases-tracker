@@ -19,7 +19,6 @@ export interface ParsedTorrent {
     indexer?: string[];
     quality?: Quality;
     resolution?: Resolution;
-    source?: Quality;
     encode?: Encode;
     releaseGroup?: string;
     size?: number;

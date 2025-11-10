@@ -59,8 +59,8 @@ export function rankTorrents(
         ) {
             points += rankingPoints.resolution[torrent.resolution];
         }
-        if (torrent.source && torrent.source in rankingPoints.quality) {
-            points += rankingPoints.quality[torrent.source];
+        if (torrent.quality && torrent.quality in rankingPoints.quality) {
+            points += rankingPoints.quality[torrent.quality];
         }
         if (torrent.encode && torrent.encode in rankingPoints.encodes) {
             points += rankingPoints.encodes[torrent.encode];
