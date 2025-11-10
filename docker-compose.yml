@@ -31,7 +31,6 @@ services:
     - PGID=1000
     - TZ=Asia/Kolkata
     - AUTO_UPDATE=true
-    - RUN_OPTS=--ProxyConnection=Socks5 --ProxyUrl=warp:1080
     volumes:
     - ./jackett/config:/config
     - ./jackett/downloads:/downloads
