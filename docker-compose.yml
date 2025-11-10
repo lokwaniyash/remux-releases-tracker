@@ -65,6 +65,7 @@ services:
     environment:
       - MONGODB_URI=${MONGODB_URI}
       - TMDB_API_KEY=${TMDB_API_KEY}
+      - TMDB_API_URL=${TMDB_API_URL}
       - JACKETT_API_KEY=${JACKETT_API_KEY}
       - JACKETT_URL=${JACKETT_URL}
     volumes:
