@@ -9,6 +9,25 @@ import { TMDBMovie } from "../types/tmdb.js";
 
 import { setupRssFeed } from "./rssFeed.js";
 
+const MAX_RETRIES = 5;
+const RETRY_DELAY = 2000;
+
+async function retryWithBackoff(fn: () => Promise<any>, maxRetries = MAX_RETRIES): Promise<any> {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            return await fn();
+        } catch (error: any) {
+            if (error.code === 'ECONNRESET' && attempt < maxRetries - 1) {
+                const delay = RETRY_DELAY * Math.pow(2, attempt); // Exponential backoff
+                console.warn(`Connection reset, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            } else {
+                throw error;
+            }
+        }
+    }
+}
+
 export async function setupCronJobs() {
     new CronJob("0 0 * * *", async () => {
         await checkNewReleases();
@@ -44,7 +63,7 @@ export async function checkNewReleases(dateRange?: DateRange) {
         });
         discoverUrl.search = params.toString();
 
-        const firstResponse = await fetchTMDBDiscover(discoverUrl.toString());
+        const firstResponse = await retryWithBackoff(() => fetchTMDBDiscover(discoverUrl.toString()));
         console.log(`Found ${firstResponse.total_results} movies across ${firstResponse.total_pages} pages`);
         const scrapedMovieIds: number[] = [];
         
@@ -69,7 +88,7 @@ export async function checkNewReleases(dateRange?: DateRange) {
                 params.set('page', page.toString());
                 discoverUrl.search = params.toString();
                 
-                const pageResponse = await fetchTMDBDiscover(discoverUrl.toString());
+                const pageResponse = await retryWithBackoff(() => fetchTMDBDiscover(discoverUrl.toString()));
                 console.log(`Processing page ${page} of ${firstResponse.total_pages}`);
                 
                 await Promise.all(

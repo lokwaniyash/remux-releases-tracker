@@ -20,6 +20,9 @@ router.post('/year/:year', async (req, res) => {
         console.log(`Starting scrape for year ${year}`);
 
         const scrapedMovieIds = await checkNewReleases(dateRange);
+        
+        console.log(`Scrape for year ${year} found ${scrapedMovieIds.length} movies`);
+
         const moviesToCheckForTorrents = await Movie.find({
             tmdbId: { $in: scrapedMovieIds }
         });
