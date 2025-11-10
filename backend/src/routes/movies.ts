@@ -22,6 +22,25 @@ router.get("/", async (req, res) => {
                 },
             },
             {
+                $addFields: {
+                    bestReleaseGroup: {
+                        $let: {
+                            vars: {
+                                sorted: {
+                                    $sortArray: {
+                                        input: "$torrents",
+                                        sortBy: { rank: -1 },
+                                    },
+                                },
+                            },
+                            in: {
+                                $arrayElemAt: ["$$sorted.releaseGroup", 0],
+                            },
+                        },
+                    },
+                },
+            },
+            {
                 $project: {
                     torrents: 0,
                 },

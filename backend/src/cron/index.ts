@@ -298,11 +298,14 @@ export async function checkNewTorrents(moviesToCheck?: any[]) {
                         ) {
                             await Torrent.findByIdAndUpdate(
                                 existingTorrent._id,
-                                { indexer: updatedIndexers }
+                                { indexer: updatedIndexers, rank: torrent.rank }
                             );
                         }
                     } else {
-                        await Torrent.create(torrent);
+                        await Torrent.create({
+                            ...torrent,
+                            rank: torrent.rank,
+                        });
                     }
                 } catch (error: unknown) {
                     console.error(

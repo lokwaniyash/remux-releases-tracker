@@ -19,6 +19,13 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
         return Math.round(bytes / Math.pow(1024, i)) + " " + sizes[i];
     };
 
+    // Sort torrents by rank (highest first)
+    const sortedTorrents = [...torrents].sort((a, b) => {
+        const rankA = a.rank || 0;
+        const rankB = b.rank || 0;
+        return rankB - rankA;
+    });
+
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
             {/* Movie Info */}
@@ -67,7 +74,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                     Available Releases
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
-                    {torrents.map((torrent) => (
+                    {sortedTorrents.map((torrent) => (
                         <div
                             key={`${torrent.movieId}-${torrent.releaseGroup}`}
                             className="bg-gray-800 rounded-lg p-4 border border-gray-700 flex flex-col"
@@ -75,9 +82,16 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                             <div className="flex-1">
                                 <div className="space-y-4">
                                     <div>
-                                        <h3 className="font-medium text-lg break-all">
-                                            {torrent.releaseGroup}
-                                        </h3>
+                                        <div className="flex items-center justify-between gap-2">
+                                            <h3 className="font-medium text-lg break-all">
+                                                {torrent.releaseGroup}
+                                            </h3>
+                                            {torrent.rank !== undefined && (
+                                                <span className="px-2 py-1 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded text-xs font-semibold">
+                                                    Rank: {torrent.rank}
+                                                </span>
+                                            )}
+                                        </div>
                                         <p className="text-sm text-gray-400 mt-1 break-all">
                                             {torrent.fileName}
                                         </p>

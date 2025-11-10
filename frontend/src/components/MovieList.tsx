@@ -139,6 +139,9 @@ export default function MovieList({ movies }: MovieListProps) {
                                 Release Date{" "}
                                 <SortIcon field="physicalReleaseDate" />
                             </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400">
+                                Best Release
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -160,6 +163,17 @@ export default function MovieList({ movies }: MovieListProps) {
                                 </td>
                                 <td className="px-6 py-4 text-gray-300">
                                     {formatDate(movie.physicalReleaseDate)}
+                                </td>
+                                <td className="px-6 py-4">
+                                    {movie.bestReleaseGroup ? (
+                                        <span className="px-3 py-1 bg-green-500/10 text-green-400 border border-green-500/20 rounded text-sm">
+                                            {movie.bestReleaseGroup}
+                                        </span>
+                                    ) : (
+                                        <span className="text-gray-500 text-sm">
+                                            —
+                                        </span>
+                                    )}
                                 </td>
                             </tr>
                         ))}

@@ -13,7 +13,9 @@ type RankingPoints = {
     visualTags: Record<VisualTag, number>;
 };
 
-export function rankTorrents(torrents: ParsedTorrent[]): ParsedTorrent[] {
+export function rankTorrents(
+    torrents: ParsedTorrent[]
+): (ParsedTorrent & { rank: number })[] {
     const rankingPoints: RankingPoints = {
         resolution: {
             "2160p": 4,
@@ -49,44 +51,33 @@ export function rankTorrents(torrents: ParsedTorrent[]): ParsedTorrent[] {
         },
     };
 
-    return torrents.sort((a, b) => {
-        let aPoints = 0;
-        let bPoints = 0;
-        if (a.resolution && a.resolution in rankingPoints.resolution) {
-            aPoints += rankingPoints.resolution[a.resolution];
+    const torrentsWithRank = torrents.map((torrent) => {
+        let points = 0;
+        if (
+            torrent.resolution &&
+            torrent.resolution in rankingPoints.resolution
+        ) {
+            points += rankingPoints.resolution[torrent.resolution];
         }
-        if (b.resolution && b.resolution in rankingPoints.resolution) {
-            bPoints += rankingPoints.resolution[b.resolution];
+        if (torrent.source && torrent.source in rankingPoints.quality) {
+            points += rankingPoints.quality[torrent.source];
         }
-        if (a.source && a.source in rankingPoints.quality) {
-            aPoints += rankingPoints.quality[a.source];
+        if (torrent.encode && torrent.encode in rankingPoints.encodes) {
+            points += rankingPoints.encodes[torrent.encode];
         }
-        if (b.source && b.source in rankingPoints.quality) {
-            bPoints += rankingPoints.quality[b.source];
-        }
-        if (a.encode && a.encode in rankingPoints.encodes) {
-            aPoints += rankingPoints.encodes[a.encode];
-        }
-        if (b.encode && b.encode in rankingPoints.encodes) {
-            bPoints += rankingPoints.encodes[b.encode];
-        }
-        if (a.visualTags) {
-            aPoints += a.visualTags.reduce((sum, tag) => {
+        if (torrent.visualTags) {
+            points += torrent.visualTags.reduce((sum, tag) => {
                 if (tag in rankingPoints.visualTags) {
                     return sum + rankingPoints.visualTags[tag];
                 }
                 return sum;
             }, 0);
         }
-        if (b.visualTags) {
-            bPoints += b.visualTags.reduce((sum, tag) => {
-                if (tag in rankingPoints.visualTags) {
-                    return sum + rankingPoints.visualTags[tag];
-                }
-                return sum;
-            }, 0);
-        }
-
-        return bPoints - aPoints;
+        return {
+            ...torrent,
+            rank: points,
+        };
     });
+
+    return torrentsWithRank.sort((a, b) => b.rank - a.rank);
 }

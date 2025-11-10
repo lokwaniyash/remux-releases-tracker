@@ -5,6 +5,7 @@ export interface Movie {
     physicalReleaseDate: string;
     hasReleased: boolean;
     posterPath?: string;
+    bestReleaseGroup?: string;
     createdAt: string;
     updatedAt: string;
 }

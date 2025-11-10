@@ -15,6 +15,7 @@ interface ITorrent extends Document {
     audioTags: string[];
     audioChannels: string[];
     languages: string[];
+    rank?: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -35,6 +36,7 @@ const TorrentSchema = new Schema<ITorrent>(
         audioTags: [{ type: String }],
         audioChannels: [{ type: String }],
         languages: [{ type: String }],
+        rank: { type: Number, default: 0 },
     },
     {
         timestamps: true,

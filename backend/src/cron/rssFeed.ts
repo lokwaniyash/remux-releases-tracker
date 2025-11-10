@@ -2,6 +2,7 @@ import axios from "axios";
 import { Movie } from "../models/Movie.js";
 import { Torrent } from "../models/Torrent.js";
 import { parseTorrentFilename } from "../utils/torrentParser.js";
+import { rankTorrents } from "../utils/rankTorrents.js";
 
 export async function setupRssFeed() {
     try {
@@ -69,6 +70,9 @@ export async function setupRssFeed() {
                         languages: parsedInfo.languages || [],
                     };
 
+                    // Calculate rank using rankTorrents function
+                    const [rankedTorrent] = rankTorrents([torrent]);
+
                     try {
                         const existingTorrent = await Torrent.findOne({
                             movieId: torrent.movieId,
@@ -92,11 +96,17 @@ export async function setupRssFeed() {
                             ) {
                                 await Torrent.findByIdAndUpdate(
                                     existingTorrent._id,
-                                    { indexer: updatedIndexers }
+                                    {
+                                        indexer: updatedIndexers,
+                                        rank: rankedTorrent.rank,
+                                    }
                                 );
                             }
                         } else {
-                            await Torrent.create(torrent);
+                            await Torrent.create({
+                                ...torrent,
+                                rank: rankedTorrent.rank,
+                            });
                         }
                     } catch (error: unknown) {
                         console.error(

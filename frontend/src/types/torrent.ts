@@ -29,6 +29,7 @@ export interface Torrent {
     audioTags: string[];
     audioChannels: string[];
     languages: string[];
+    rank?: number;
     createdAt: string;
     updatedAt: string;
 }
