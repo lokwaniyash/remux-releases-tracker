@@ -1,6 +1,7 @@
 import express from 'express';
 import { checkNewReleases, checkNewTorrents } from '../cron/index.js';
 import { DateRange } from '../types/date.js';
+import { Movie } from '../models/Movie.js';
 
 const router = express.Router();
 
@@ -18,8 +19,12 @@ router.post('/year/:year', async (req, res) => {
         
         console.log(`Starting scrape for year ${year}`);
 
-        await checkNewReleases(dateRange)
-        await checkNewTorrents();
+        const scrapedMovieIds = await checkNewReleases(dateRange);
+        const moviesToCheckForTorrents = await Movie.find({
+            tmdbId: { $in: scrapedMovieIds }
+        });
+        
+        await checkNewTorrents(moviesToCheckForTorrents);
 
         res.json({ message: `Started scraping for year ${year}` });
     } catch (error) {

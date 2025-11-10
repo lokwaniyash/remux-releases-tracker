@@ -17,8 +17,6 @@ export async function setupCronJobs() {
     new CronJob("0 */6 * * *", async () => {
         await checkNewTorrents();
     }).start();
-
-    // Check RSS feed more frequently for new releases
     new CronJob("*/15 * * * *", async () => {
         await setupRssFeed();
     }).start();
@@ -48,15 +46,18 @@ export async function checkNewReleases(dateRange?: DateRange) {
 
         const firstResponse = await fetchTMDBDiscover(discoverUrl.toString());
         console.log(`Found ${firstResponse.total_results} movies across ${firstResponse.total_pages} pages`);
+        const scrapedMovieIds: number[] = [];
+        
         await Promise.all(
-            firstResponse.results.map((movie: TMDBMovie) => 
-                checkBlurayReleaseDate(
+            firstResponse.results.map((movie: TMDBMovie) => {
+                scrapedMovieIds.push(movie.id);
+                return checkBlurayReleaseDate(
                     movie.id,
                     movie.title,
                     movie.poster_path,
                     new Date(movie.release_date).getFullYear()
-                )
-            )
+                );
+            })
         );
         if (firstResponse.total_pages > 1) {
             const remainingPages = Array.from(
@@ -72,19 +73,23 @@ export async function checkNewReleases(dateRange?: DateRange) {
                 console.log(`Processing page ${page} of ${firstResponse.total_pages}`);
                 
                 await Promise.all(
-                    pageResponse.results.map((movie: TMDBMovie) => 
-                        checkBlurayReleaseDate(
+                    pageResponse.results.map((movie: TMDBMovie) => {
+                        scrapedMovieIds.push(movie.id);
+                        return checkBlurayReleaseDate(
                             movie.id,
                             movie.title,
                             movie.poster_path,
                             new Date(movie.release_date).getFullYear()
-                        )
-                    )
+                        );
+                    })
                 );
             }
         }
+        
+        return scrapedMovieIds;
     } catch (err) {
         console.error("Error checking new releases:", err);
+        return [];
     }
 }
 
@@ -142,33 +147,28 @@ async function checkBlurayReleaseDate(movieId: number, title: string, posterPath
     }
 }
 
-export async function checkNewTorrents() {
+export async function checkNewTorrents(moviesToCheck?: any[]) {
     try {
-        // Get today's date at midnight for consistent comparison
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        let moviesForSearch: any[];
 
-        // Get all released movies
-        const releasedMovies = await Movie.find({ hasReleased: true });
-        
-        // Get movies that have just been released (in their 10-day window)
-        const tenDaysAgo = new Date(today);
-        tenDaysAgo.setDate(today.getDate() - 10);
-        
-        const newlyReleasedMovies = await Movie.find({
-            physicalReleaseDate: {
-                $gte: tenDaysAgo,
-                $lte: today
-            }
-        });
+        if (moviesToCheck) {
+            moviesForSearch = moviesToCheck;
+        } else {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
-        // Combine both lists, removing duplicates by tmdbId
-        const moviesToCheck = [...releasedMovies, ...newlyReleasedMovies]
-            .filter((movie, index, self) => 
-                index === self.findIndex(m => m.tmdbId === movie.tmdbId)
-            );
+            const tenDaysAgo = new Date(today);
+            tenDaysAgo.setDate(today.getDate() - 10);
+            
+            moviesForSearch = await Movie.find({
+                physicalReleaseDate: {
+                    $gte: tenDaysAgo,
+                    $lte: today
+                }
+            });
+        }
 
-        for (const movie of moviesToCheck) {
+        for (const movie of moviesForSearch) {
             console.log(`Searching torrents for: ${movie.title} (${movie.year})`);
             const response = await axios.get(
                 `${process.env.JACKETT_URL}/api/v2.0/indexers/all/results`,

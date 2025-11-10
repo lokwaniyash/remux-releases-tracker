@@ -13,21 +13,17 @@ export async function setupRssFeed() {
                 }),
             },
         });
-
-        // Get all results directly using the all results endpoint
         const response = await axios.get(
             `${process.env.JACKETT_URL}/api/v2.0/indexers/all/results`,
             {
                 params: {
                     apikey: process.env.JACKETT_API_KEY,
-                    Category: ["2000", "2045"], // Bluray categories
+                    Category: ["2000", "2045"], // Movie categories
                 },
             }
         );
 
         const items: any[] = [];
-
-        // Process results from all indexers
         if (response.data?.Results) {
             items.push(
                 ...response.data.Results.map((item: any) => ({
@@ -49,8 +45,6 @@ export async function setupRssFeed() {
         for (const item of items) {
             const parsedInfo = parseTorrentFilename(item.title);
             if (parsedInfo.quality !== "BluRay REMUX") continue;
-
-            // Try to match this remux with one of our movies that need remuxes
             for (const movie of notFullyRemuxedMovies) {
                 if (
                     item.title
