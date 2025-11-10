@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  warp:
+    image: caomingjun/warp
+    container_name: warp
+    restart: always
+    device_cgroup_rules:
+      - 'c 10:200 rwm'
+    environment:
+      - WARP_SLEEP=2
+      # - WARP_LICENSE_KEY= # optional, add your WARP+ key if you have one
+    cap_add:
+      - MKNOD
+      - AUDIT_WRITE
+      - NET_ADMIN
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0
+      - net.ipv4.conf.all.src_valid_mark=1
+    volumes:
+      - ./warp-data:/var/lib/cloudflare-warp
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - JACKETT_API_KEY=${JACKETT_API_KEY}
+      - JACKETT_URL=${JACKETT_URL}
+      - HTTP_PROXY=socks5://warp:1080
+      - HTTPS_PROXY=socks5://warp:1080
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - warp
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

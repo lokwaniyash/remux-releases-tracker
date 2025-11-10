@@ -1,0 +1,31 @@
+import express from 'express';
+import { checkNewReleases, checkNewTorrents } from '../cron';
+import { DateRange } from '../types/date';
+
+const router = express.Router();
+
+router.post('/year/:year', async (req, res) => {
+    try {
+        const year = parseInt(req.params.year);
+        if (isNaN(year) || year < 1900 || year > 2100) {
+            return res.status(400).json({ error: 'Invalid year' });
+        }
+
+        const dateRange: DateRange = {
+            startDate: `${year}-01-01`,
+            endDate: `${year}-12-31`
+        };
+        
+        console.log(`Starting scrape for year ${year}`);
+
+        await checkNewReleases(dateRange)
+        await checkNewTorrents();
+
+        res.json({ message: `Started scraping for year ${year}` });
+    } catch (error) {
+        console.error('Error in scrape route:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+export const scrapeRoutes = router;
