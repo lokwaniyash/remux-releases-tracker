@@ -9,14 +9,14 @@ A web application to track Blu-ray releases and their available torrents on priv
 - Calendar view for upcoming releases
 - Quality comparison and ranking system
 - Magnet link support
-- Multi-indexer search through Prowlarr
+- Multi-indexer search through Jackett
 
 ## Tech Stack
 
 - Frontend: Next.js with TypeScript and Tailwind CSS
 - Backend: Node.js/Express with TypeScript
 - Database: MongoDB
-- Integration: TMDB API, Prowlarr API
+- Integration: TMDB API, Jackett API
 - Containerization: Docker
 
 ## Setup
@@ -39,8 +39,8 @@ NEXT_PUBLIC_API_URL=http://localhost:4000
 # Backend
 BACKEND_PORT=4000
 TMDB_API_KEY=your_tmdb_api_key
-PROWLARR_API_KEY=your_prowlarr_api_key
-PROWLARR_URL=http://localhost:9696
+JACKETT_API_KEY=your_jackett_api_key
+JACKETT_URL=http://localhost:9696
 
 # MongoDB
 MONGO_PORT=27017
@@ -75,7 +75,7 @@ MONGO_PASSWORD=password
 
 ```bash
 # Build and run with Docker
-docker-compose up --build
+docker compose up --build
 ```
 
 ## License
