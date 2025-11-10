@@ -1,4 +1,4 @@
-import { ParsedTorrent } from '../types/torrent';
+import { ParsedTorrent } from '../types/torrent.js';
 
 const REGEXES = {
   resolutions: {

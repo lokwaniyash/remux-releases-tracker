@@ -1,13 +1,13 @@
 import { CronJob } from "cron";
 import axios from "axios";
-import { Movie } from "../models/Movie";
-import { Torrent } from "../models/Torrent";
-import { parseTorrentFilename } from "../utils/torrentParser";
-import { rankTorrents } from "../utils/rankTorrents";
-import { fetchTMDBDiscover, fetchTMDBReleaseDate } from "../utils/rateLimit";
-import { TMDBMovie } from "../types/tmdb";
+import { Movie } from "../models/Movie.js";
+import { Torrent } from "../models/Torrent.js";
+import { parseTorrentFilename } from "../utils/torrentParser.js";
+import { rankTorrents } from "../utils/rankTorrents.js";
+import { fetchTMDBDiscover, fetchTMDBReleaseDate } from "../utils/rateLimit.js";
+import { TMDBMovie } from "../types/tmdb.js";
 
-import { setupRssFeed } from "./rssFeed";
+import { setupRssFeed } from "./rssFeed.js";
 
 export async function setupCronJobs() {
     new CronJob("0 0 * * *", async () => {

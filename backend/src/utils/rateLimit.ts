@@ -1,6 +1,6 @@
 import pLimit from 'p-limit';
 import { AxiosError } from 'axios';
-import { TMDBDiscoverResponse, TMDBReleaseDateResponse } from '../types/tmdb';
+import { TMDBDiscoverResponse, TMDBReleaseDateResponse } from '../types/tmdb.js';
 const RATE_LIMIT = 40;
 const RATE_LIMIT_WINDOW = 10000;
 const RETRY_DELAY = 1000;

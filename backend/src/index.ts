@@ -2,9 +2,9 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { movieRoutes } from "./routes/movies";
-import { scrapeRoutes } from "./routes/scrape";
-import { setupCronJobs } from "./cron";
+import { movieRoutes } from "./routes/movies.js";
+import { scrapeRoutes } from "./routes/scrape.js";
+import { setupCronJobs } from "./cron/index.js";
 
 dotenv.config();
 

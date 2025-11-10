@@ -1,7 +1,7 @@
 import axios from "axios";
-import { Movie } from "../models/Movie";
-import { Torrent } from "../models/Torrent";
-import { parseTorrentFilename } from "../utils/torrentParser";
+import { Movie } from "../models/Movie.js";
+import { Torrent } from "../models/Torrent.js";
+import { parseTorrentFilename } from "../utils/torrentParser.js";
 
 export async function setupRssFeed() {
     try {

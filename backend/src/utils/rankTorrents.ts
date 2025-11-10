@@ -1,4 +1,4 @@
-import { ParsedTorrent, Resolution, Quality, Encode, VisualTag } from '../types/torrent';
+import { ParsedTorrent, Resolution, Quality, Encode, VisualTag } from '../types/torrent.js';
 
 type RankingPoints = {
   resolution: Record<Resolution, number>;

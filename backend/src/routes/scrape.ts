@@ -1,6 +1,6 @@
 import express from 'express';
-import { checkNewReleases, checkNewTorrents } from '../cron';
-import { DateRange } from '../types/date';
+import { checkNewReleases, checkNewTorrents } from '../cron/index.js';
+import { DateRange } from '../types/date.js';
 
 const router = express.Router();
 

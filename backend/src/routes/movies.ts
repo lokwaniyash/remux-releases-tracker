@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { Movie } from "../models/Movie";
-import { Torrent } from "../models/Torrent";
+import { Movie } from "../models/Movie.js";
+import { Torrent } from "../models/Torrent.js";
 
 const router = Router();
 
