@@ -67,8 +67,6 @@ services:
       - TMDB_API_KEY=${TMDB_API_KEY}
       - JACKETT_API_KEY=${JACKETT_API_KEY}
       - JACKETT_URL=${JACKETT_URL}
-      - HTTP_PROXY=socks5://warp:1080
-      - HTTPS_PROXY=socks5://warp:1080
     volumes:
       - ./backend:/app
       - /app/node_modules
