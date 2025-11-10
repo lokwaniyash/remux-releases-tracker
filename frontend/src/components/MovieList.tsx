@@ -171,7 +171,7 @@ export default function MovieList({ movies }: MovieListProps) {
                                         </span>
                                     ) : (
                                         <span className="text-gray-300 text-sm">
-                                            —
+                                            -
                                         </span>
                                     )}
                                 </td>
