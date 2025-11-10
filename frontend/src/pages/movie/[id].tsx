@@ -1,45 +1,45 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import MovieDetails from '../../components/MovieDetails';
-import { Movie } from '../../types/movie';
-import { Torrent } from '../../types/torrent';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import MovieDetails from "../../components/MovieDetails";
+import { Movie } from "../../types/movie";
+import { Torrent } from "../../types/torrent";
 
 interface MovieWithTorrents {
-  movie: Movie;
-  torrents: Torrent[];
+    movie: Movie;
+    torrents: Torrent[];
 }
 
 export default function MoviePage() {
-  const router = useRouter();
-  const { id } = router.query;
-  const [data, setData] = useState<MovieWithTorrents | null>(null);
+    const router = useRouter();
+    const { id } = router.query;
+    const [data, setData] = useState<MovieWithTorrents | null>(null);
 
-  useEffect(() => {
-    const fetchMovie = async () => {
-      if (!id) return;
-      try {
-        const response = await fetch(`/api/movies/${id}`);
-        const movieData = await response.json();
-        setData(movieData);
-      } catch (error) {
-        console.error('Error fetching movie:', error);
-      }
-    };
+    useEffect(() => {
+        const fetchMovie = async () => {
+            if (!id) return;
+            try {
+                const response = await fetch(`/api/movies/${id}`);
+                const movieData = await response.json();
+                setData(movieData);
+            } catch (error) {
+                console.error("Error fetching movie:", error);
+            }
+        };
 
-    fetchMovie();
-  }, [id]);
+        fetchMovie();
+    }, [id]);
 
-  if (!data) {
+    if (!data) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="animate-pulse">Loading...</div>
+            </div>
+        );
+    }
+
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">Loading...</div>
-      </div>
+        <div className="container mx-auto px-4 py-8">
+            <MovieDetails movie={data.movie} torrents={data.torrents} />
+        </div>
     );
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <MovieDetails movie={data.movie} torrents={data.torrents} />
-    </div>
-  );
 }

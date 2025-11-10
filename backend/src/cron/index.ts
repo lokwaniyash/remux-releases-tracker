@@ -12,15 +12,22 @@ import { setupRssFeed } from "./rssFeed.js";
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000;
 
-async function retryWithBackoff(fn: () => Promise<any>, maxRetries = MAX_RETRIES): Promise<any> {
+async function retryWithBackoff(
+    fn: () => Promise<any>,
+    maxRetries = MAX_RETRIES
+): Promise<any> {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
             return await fn();
         } catch (error: any) {
-            if (error.code === 'ECONNRESET' && attempt < maxRetries - 1) {
+            if (error.code === "ECONNRESET" && attempt < maxRetries - 1) {
                 const delay = RETRY_DELAY * Math.pow(2, attempt); // Exponential backoff
-                console.warn(`Connection reset, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`);
-                await new Promise(resolve => setTimeout(resolve, delay));
+                console.warn(
+                    `Connection reset, retrying in ${delay}ms (attempt ${
+                        attempt + 1
+                    }/${maxRetries})`
+                );
+                await new Promise((resolve) => setTimeout(resolve, delay));
             } else {
                 throw error;
             }
@@ -52,21 +59,30 @@ export async function checkNewReleases(dateRange?: DateRange) {
         const defaultStartDate = new Date(today);
         defaultStartDate.setDate(defaultStartDate.getDate() - 1);
 
-        const discoverUrl = new URL(`${process.env.TMDB_API_URL}/discover/movie`);
+        const discoverUrl = new URL(
+            `${process.env.TMDB_API_URL}/discover/movie`
+        );
         const params = new URLSearchParams({
             api_key: process.env.TMDB_API_KEY!,
-            "primary_release_date.gte": dateRange?.startDate || defaultStartDate.toISOString().split("T")[0],
-            "primary_release_date.lte": dateRange?.endDate || today.toISOString().split("T")[0],
+            "primary_release_date.gte":
+                dateRange?.startDate ||
+                defaultStartDate.toISOString().split("T")[0],
+            "primary_release_date.lte":
+                dateRange?.endDate || today.toISOString().split("T")[0],
             "vote_count.gte": "100",
-            "sort_by": "primary_release_date.desc",
-            "page": "1"
+            sort_by: "primary_release_date.desc",
+            page: "1",
         });
         discoverUrl.search = params.toString();
 
-        const firstResponse = await retryWithBackoff(() => fetchTMDBDiscover(discoverUrl.toString()));
-        console.log(`Found ${firstResponse.total_results} movies across ${firstResponse.total_pages} pages`);
+        const firstResponse = await retryWithBackoff(() =>
+            fetchTMDBDiscover(discoverUrl.toString())
+        );
+        console.log(
+            `Found ${firstResponse.total_results} movies across ${firstResponse.total_pages} pages`
+        );
         const scrapedMovieIds: number[] = [];
-        
+
         await Promise.all(
             firstResponse.results.map((movie: TMDBMovie) => {
                 scrapedMovieIds.push(movie.id);
@@ -85,12 +101,16 @@ export async function checkNewReleases(dateRange?: DateRange) {
             );
 
             for (const page of remainingPages) {
-                params.set('page', page.toString());
+                params.set("page", page.toString());
                 discoverUrl.search = params.toString();
-                
-                const pageResponse = await retryWithBackoff(() => fetchTMDBDiscover(discoverUrl.toString()));
-                console.log(`Processing page ${page} of ${firstResponse.total_pages}`);
-                
+
+                const pageResponse = await retryWithBackoff(() =>
+                    fetchTMDBDiscover(discoverUrl.toString())
+                );
+                console.log(
+                    `Processing page ${page} of ${firstResponse.total_pages}`
+                );
+
                 await Promise.all(
                     pageResponse.results.map((movie: TMDBMovie) => {
                         scrapedMovieIds.push(movie.id);
@@ -104,7 +124,7 @@ export async function checkNewReleases(dateRange?: DateRange) {
                 );
             }
         }
-        
+
         return scrapedMovieIds;
     } catch (err) {
         console.error("Error checking new releases:", err);
@@ -112,22 +132,35 @@ export async function checkNewReleases(dateRange?: DateRange) {
     }
 }
 
-async function checkBlurayReleaseDate(movieId: number, title: string, posterPath: string, year: number) {
+async function checkBlurayReleaseDate(
+    movieId: number,
+    title: string,
+    posterPath: string,
+    year: number
+) {
     try {
-        console.log(`Checking Blu-ray release date for movie: ${title} (${year})`);
-        
-        const releaseDatesUrl = new URL(`${process.env.TMDB_API_URL}/movie/${movieId}/release_dates`);
+        console.log(
+            `Checking Blu-ray release date for movie: ${title} (${year})`
+        );
+
+        const releaseDatesUrl = new URL(
+            `${process.env.TMDB_API_URL}/movie/${movieId}/release_dates`
+        );
         const params = new URLSearchParams({
             api_key: process.env.TMDB_API_KEY!,
         });
         releaseDatesUrl.search = params.toString();
 
-        const releaseDatesResponse = await fetchTMDBReleaseDate(releaseDatesUrl.toString());
+        const releaseDatesResponse = await fetchTMDBReleaseDate(
+            releaseDatesUrl.toString()
+        );
 
-        console.log(`Processing release dates for: ${title} found a total of ${releaseDatesResponse?.results.length} country results`);
+        console.log(
+            `Processing release dates for: ${title} found a total of ${releaseDatesResponse?.results.length} country results`
+        );
 
         let earliestReleaseDate: Date | null = null;
-        
+
         for (const country of releaseDatesResponse.results) {
             for (const release of country.release_dates) {
                 if (
@@ -135,7 +168,10 @@ async function checkBlurayReleaseDate(movieId: number, title: string, posterPath
                     release.note?.toLowerCase().includes("blu")
                 ) {
                     const releaseDate = new Date(release.release_date);
-                    if (!earliestReleaseDate || releaseDate < earliestReleaseDate) {
+                    if (
+                        !earliestReleaseDate ||
+                        releaseDate < earliestReleaseDate
+                    ) {
                         earliestReleaseDate = releaseDate;
                     }
                 }
@@ -156,7 +192,11 @@ async function checkBlurayReleaseDate(movieId: number, title: string, posterPath
                 },
                 { upsert: true, new: true }
             );
-            console.log(`Movie ${result.isNew ? 'created' : 'updated'}: ${title} with release date: ${earliestReleaseDate}`);
+            console.log(
+                `Movie ${
+                    result.isNew ? "created" : "updated"
+                }: ${title} with release date: ${earliestReleaseDate}`
+            );
         }
     } catch (err) {
         console.error(
@@ -178,17 +218,19 @@ export async function checkNewTorrents(moviesToCheck?: any[]) {
 
             const tenDaysAgo = new Date(today);
             tenDaysAgo.setDate(today.getDate() - 10);
-            
+
             moviesForSearch = await Movie.find({
                 physicalReleaseDate: {
                     $gte: tenDaysAgo,
-                    $lte: today
-                }
+                    $lte: today,
+                },
             });
         }
 
         for (const movie of moviesForSearch) {
-            console.log(`Searching torrents for: ${movie.title} (${movie.year})`);
+            console.log(
+                `Searching torrents for: ${movie.title} (${movie.year})`
+            );
             const response = await axios.get(
                 `${process.env.JACKETT_URL}/api/v2.0/indexers/all/results`,
                 {
@@ -196,17 +238,23 @@ export async function checkNewTorrents(moviesToCheck?: any[]) {
                         apikey: process.env.JACKETT_API_KEY,
                         Query: `${movie.title} ${movie.year} remux`,
                         Category: ["2000", "2045"],
-                        _: Date.now()
+                        _: Date.now(),
                     },
                 }
             );
 
-            console.log(`Found ${response.data?.Results?.length || 0} torrents`);
+            console.log(
+                `Found ${response.data?.Results?.length || 0} torrents`
+            );
 
             const validTorrents = [];
             for (const result of response.data?.Results || []) {
                 const parsedInfo = parseTorrentFilename(result.Title);
-                if (parsedInfo.quality === "BluRay REMUX" && parsedInfo.resolution && parsedInfo.encode) {
+                if (
+                    parsedInfo.quality === "BluRay REMUX" &&
+                    parsedInfo.resolution &&
+                    parsedInfo.encode
+                ) {
                     validTorrents.push({
                         movieId: movie.tmdbId,
                         indexer: [result.Tracker],
@@ -233,23 +281,37 @@ export async function checkNewTorrents(moviesToCheck?: any[]) {
                         releaseGroup: torrent.releaseGroup,
                         resolution: torrent.resolution,
                         quality: torrent.quality,
-                        encode: torrent.encode
+                        encode: torrent.encode,
                     });
 
                     if (existingTorrent) {
-                        const updatedIndexers = Array.from(new Set([
-                            ...(existingTorrent.indexer || []),
-                            ...(torrent.indexer || [])
-                        ]));
-                        
-                        if (updatedIndexers.length > existingTorrent.indexer.length) {
-                            await Torrent.findByIdAndUpdate(existingTorrent._id, { indexer: updatedIndexers });
+                        const updatedIndexers = Array.from(
+                            new Set([
+                                ...(existingTorrent.indexer || []),
+                                ...(torrent.indexer || []),
+                            ])
+                        );
+
+                        if (
+                            updatedIndexers.length >
+                            existingTorrent.indexer.length
+                        ) {
+                            await Torrent.findByIdAndUpdate(
+                                existingTorrent._id,
+                                { indexer: updatedIndexers }
+                            );
                         }
                     } else {
                         await Torrent.create(torrent);
                     }
                 } catch (error: unknown) {
-                    console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
+                    console.error(
+                        `Error: ${
+                            error instanceof Error
+                                ? error.message
+                                : String(error)
+                        }`
+                    );
                 }
             }
         }

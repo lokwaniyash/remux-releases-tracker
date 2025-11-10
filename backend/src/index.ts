@@ -16,19 +16,18 @@ app.use(express.json());
 
 mongoose
     .connect(process.env.MONGODB_URI as string)
-    .then(async() => {
+    .then(async () => {
         console.log("Connected to MongoDB");
         setupCronJobs();
     })
     .catch((err) => console.error("MongoDB connection error:", err));
 
-mongoose.connection.on('disconnected', () => {
-  console.log('Mongoose disconnected');
+mongoose.connection.on("disconnected", () => {
+    console.log("Mongoose disconnected");
 });
-mongoose.connection.on('error', (err) => {
-  console.error('Mongoose connection error:', err);
+mongoose.connection.on("error", (err) => {
+    console.error("Mongoose connection error:", err);
 });
-
 
 app.use("/api/movies", movieRoutes);
 app.use("/api/scrape", scrapeRoutes);

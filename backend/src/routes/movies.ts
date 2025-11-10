@@ -12,25 +12,25 @@ router.get("/", async (req, res) => {
                     from: "torrents",
                     localField: "tmdbId",
                     foreignField: "movieId",
-                    as: "torrents"
-                }
+                    as: "torrents",
+                },
             },
             {
                 $match: {
                     "torrents.0": { $exists: true },
-                    hasReleased: true
-                }
+                    hasReleased: true,
+                },
             },
             {
                 $project: {
-                    torrents: 0
-                }
+                    torrents: 0,
+                },
             },
             {
                 $sort: {
-                    physicalReleaseDate: -1
-                }
-            }
+                    physicalReleaseDate: -1,
+                },
+            },
         ]);
         res.json(movies);
     } catch (err) {
