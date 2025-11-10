@@ -78,7 +78,7 @@ export default function MovieList({ movies }: MovieListProps) {
 
     const SortIcon = ({ field }: { field: SortField }) => {
         if (sortField !== field)
-            return <span className="text-gray-500">↕</span>;
+            return <span className="text-gray-300">↕</span>;
         return sortOrder === "asc" ? <span>↑</span> : <span>↓</span>;
     };
 
@@ -153,7 +153,7 @@ export default function MovieList({ movies }: MovieListProps) {
                                 <td className="px-6 py-4">
                                     <Link
                                         href={`/movie/${movie.tmdbId}`}
-                                        className="text-white hover:text-blue-400 transition-colors"
+                                        className="text-gray-300 hover:text-gray-50 transition-colors"
                                     >
                                         {movie.title}
                                     </Link>
@@ -166,11 +166,11 @@ export default function MovieList({ movies }: MovieListProps) {
                                 </td>
                                 <td className="px-6 py-4">
                                     {movie.bestReleaseGroup ? (
-                                        <span className="px-3 py-1 bg-green-500/10 text-green-400 border border-green-500/20 rounded text-sm">
+                                        <span className="px-3 py-1 bg-gray-400/10 text-gray-300 border border-gray-400/20 rounded text-sm">
                                             {movie.bestReleaseGroup}
                                         </span>
                                     ) : (
-                                        <span className="text-gray-500 text-sm">
+                                        <span className="text-gray-300 text-sm">
                                             —
                                         </span>
                                     )}

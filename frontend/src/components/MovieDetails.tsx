@@ -30,7 +30,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
         <div className="max-w-7xl mx-auto px-4 py-8">
             {/* Movie Info */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <div className="md:col-span-1">
+                <div className="md:col-span-1 rounded-lg border border-gray-400">
                     {movie.posterPath ? (
                         <Image
                             src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`}
@@ -41,7 +41,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                         />
                     ) : (
                         <div className="w-full aspect-[2/3] bg-gray-800 rounded-lg flex items-center justify-center">
-                            <span className="text-gray-500">
+                            <span className="text-gray-300">
                                 No poster available
                             </span>
                         </div>
@@ -49,14 +49,14 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                 </div>
                 <div className="md:col-span-3">
                     <div className="flex items-start justify-between">
-                        <h1 className="text-3xl font-bold">
+                        <h1 className="text-3xl font-bold text-gray-100">
                             {movie.title} ({movie.year})
                         </h1>
                         <a
                             href={`https://www.themoviedb.org/movie/${movie.tmdbId}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-400 hover:text-blue-300 transition-colors"
+                            className="text-gray-400 hover:text-blue-300 transition-colors"
                         >
                             View on TMDB
                         </a>
@@ -70,7 +70,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
 
             {/* Torrents */}
             <div className="bg-gray-900 rounded-lg shadow-xl p-6">
-                <h2 className="text-xl font-semibold mb-6">
+                <h2 className="text-xl font-semibold mb-6 text-gray-200">
                     Available Releases
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
@@ -87,7 +87,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                                                 {torrent.releaseGroup}
                                             </h3>
                                             {torrent.rank !== undefined && (
-                                                <span className="px-2 py-1 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded text-xs font-semibold">
+                                                <span className="px-2 py-1 bg-gray-400/10 text-gray-300 border border-gray-400/20 rounded text-xs font-semibold">
                                                     Rank: {torrent.rank}
                                                 </span>
                                             )}
@@ -100,7 +100,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                                     <div className="space-y-1.5">
                                         {torrent.resolution && (
                                             <p className="text-sm">
-                                                <span className="text-gray-500">
+                                                <span className="text-gray-400">
                                                     Resolution:
                                                 </span>{" "}
                                                 <span className="text-gray-300">
@@ -110,7 +110,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                                         )}
                                         {torrent.source && (
                                             <p className="text-sm">
-                                                <span className="text-gray-500">
+                                                <span className="text-gray-400">
                                                     Source:
                                                 </span>{" "}
                                                 <span className="text-gray-300">
@@ -120,7 +120,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                                         )}
                                         {torrent.encode && (
                                             <p className="text-sm">
-                                                <span className="text-gray-500">
+                                                <span className="text-gray-400">
                                                     Codec:
                                                 </span>{" "}
                                                 <span className="text-gray-300">
@@ -129,7 +129,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                                             </p>
                                         )}
                                         <p className="text-sm">
-                                            <span className="text-gray-500">
+                                            <span className="text-gray-400">
                                                 Size:
                                             </span>{" "}
                                             <span className="text-gray-300">
@@ -138,7 +138,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                                         </p>
                                         {torrent.languages.length > 0 && (
                                             <p className="text-sm">
-                                                <span className="text-gray-500">
+                                                <span className="text-gray-400">
                                                     Languages:
                                                 </span>{" "}
                                                 <span className="text-gray-300">
