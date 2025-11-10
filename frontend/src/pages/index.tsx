@@ -12,7 +12,7 @@ export default function Home() {
       try {
         setIsLoading(true);
         setError(null);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/movies`);
+        const response = await fetch(`/api/movies`);
         if (!response.ok) throw new Error('Failed to fetch movies');
         const data = await response.json();
         setMovies(data);

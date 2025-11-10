@@ -18,7 +18,7 @@ export default function MoviePage() {
     const fetchMovie = async () => {
       if (!id) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/movies/${id}`);
+        const response = await fetch(`/api/movies/${id}`);
         const movieData = await response.json();
         setData(movieData);
       } catch (error) {

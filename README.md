@@ -34,7 +34,6 @@ The application will be available at:
 ```env
 # Frontend
 FRONTEND_PORT=3000
-NEXT_PUBLIC_API_URL=http://localhost:4000
 
 # Backend
 BACKEND_PORT=4000

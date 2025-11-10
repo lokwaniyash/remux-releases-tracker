@@ -8,7 +8,7 @@ export default function CalendarPage() {
   useEffect(() => {
     const fetchUpcomingReleases = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/movies/calendar/upcoming`);
+        const response = await fetch(`/api/movies/calendar/upcoming`);
         const data = await response.json();
         setUpcomingReleases(data);
       } catch (error) {
