@@ -9,8 +9,8 @@ export default function Header() {
                     <Image
                         src="/favicon-remux-1.png"
                         alt="Logo"
-                        width={32}
-                        height={32}
+                        width={48}
+                        height={48}
                         className="rounded"
                     />
                 </Link>
