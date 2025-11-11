@@ -131,16 +131,6 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                                                     </span>
                                                 </p>
                                             )}
-                                            {torrent.source && (
-                                                <p className="text-sm">
-                                                    <span className="text-gray-400">
-                                                        Source:
-                                                    </span>{" "}
-                                                    <span className="text-gray-300">
-                                                        {torrent.source}
-                                                    </span>
-                                                </p>
-                                            )}
                                             {torrent.encode && (
                                                 <p className="text-sm">
                                                     <span className="text-gray-400">
@@ -159,18 +149,6 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                                                     {formatSize(torrent.size)}
                                                 </span>
                                             </p>
-                                            {torrent.languages.length > 0 && (
-                                                <p className="text-sm">
-                                                    <span className="text-gray-400">
-                                                        Languages:
-                                                    </span>{" "}
-                                                    <span className="text-gray-300">
-                                                        {torrent.languages.join(
-                                                            ", "
-                                                        )}
-                                                    </span>
-                                                </p>
-                                            )}
                                         </div>
 
                                         {/* Visual Features */}
