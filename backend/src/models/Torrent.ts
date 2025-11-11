@@ -8,7 +8,8 @@ interface ITorrent extends Document {
     encode: string;
     releaseGroup: string;
     size: number;
-    magnetLink: string;
+    magnetLink?: string;
+    links: { indexer: string; guid: string }[];
     fileName: string;
     firstSeen: Date;
     visualTags: string[];
@@ -29,7 +30,13 @@ const TorrentSchema = new Schema<ITorrent>(
         encode: { type: String, required: true },
         releaseGroup: { type: String, required: true },
         size: { type: Number, required: true },
-        magnetLink: { type: String, required: true },
+        magnetLink: { type: String },
+        links: [
+            {
+                indexer: { type: String, required: true },
+                guid: { type: String, required: true },
+            },
+        ],
         fileName: { type: String, required: true },
         firstSeen: { type: Date, required: true },
         visualTags: [{ type: String }],
@@ -43,7 +50,7 @@ const TorrentSchema = new Schema<ITorrent>(
     }
 );
 TorrentSchema.index(
-    { movieId: 1, releaseGroup: 1, resolution: 1, quality: 1, encode: 1 },
+    { movieId: 1, releaseGroup: 1, resolution: 1, quality: 1, encode: 1, fileName: 1 },
     { name: "torrent_match_index" }
 );
 

@@ -43,9 +43,9 @@ export async function setupCronJobs() {
     new CronJob("0 */6 * * *", async () => {
         await checkNewTorrents();
     }).start();
-    new CronJob("*/15 * * * *", async () => {
-        await setupRssFeed();
-    }).start();
+    // new CronJob("*/15 * * * *", async () => {
+    //     await setupRssFeed();
+    // }).start();
 }
 
 interface DateRange {
@@ -255,7 +255,7 @@ export async function checkNewTorrents(moviesToCheck?: any[]) {
                     parsedInfo.resolution &&
                     parsedInfo.encode
                 ) {
-                    validTorrents.push({
+                    const torrentData: any = {
                         movieId: movie.tmdbId,
                         indexer: [result.Tracker],
                         resolution: parsedInfo.resolution,
@@ -263,14 +263,25 @@ export async function checkNewTorrents(moviesToCheck?: any[]) {
                         encode: parsedInfo.encode,
                         releaseGroup: parsedInfo.releaseGroup || "Unknown",
                         size: result.Size,
-                        magnetLink: result.MagnetUri || result.Link,
                         fileName: result.Title,
                         firstSeen: new Date(),
                         visualTags: parsedInfo.visualTags || [],
                         audioTags: parsedInfo.audioTags || [],
                         audioChannels: parsedInfo.audioChannels || [],
                         languages: parsedInfo.languages || [],
-                    });
+                        links: [],
+                    };
+
+                    if (result.MagnetUri) {
+                        torrentData.magnetLink = result.MagnetUri;
+                    } else if (result.Guid) {
+                        torrentData.links.push({
+                            indexer: result.Tracker,
+                            guid: result.Guid,
+                        });
+                    }
+
+                    validTorrents.push(torrentData);
                 }
             }
 
@@ -282,6 +293,7 @@ export async function checkNewTorrents(moviesToCheck?: any[]) {
                         resolution: torrent.resolution,
                         quality: torrent.quality,
                         encode: torrent.encode,
+                        fileName: torrent.fileName
                     });
 
                     if (existingTorrent) {
@@ -292,13 +304,38 @@ export async function checkNewTorrents(moviesToCheck?: any[]) {
                             ])
                         );
 
+                        const existingLinks = existingTorrent.links || [];
+                        const newLinks = torrent.links || [];
+                        const mergedLinks = [
+                            ...existingLinks,
+                            ...newLinks.filter(
+                                (nl: any) =>
+                                    !existingLinks.some(
+                                        (el: any) =>
+                                            el.indexer === nl.indexer &&
+                                            el.guid === nl.guid
+                                    )
+                            ),
+                        ];
+
+                        const updateData: any = {
+                            indexer: updatedIndexers,
+                            rank: torrent.rank,
+                            links: mergedLinks,
+                        };
+
+                        if (torrent.magnetLink && !existingTorrent.magnetLink) {
+                            updateData.magnetLink = torrent.magnetLink;
+                        }
+
                         if (
                             updatedIndexers.length >
-                            existingTorrent.indexer.length
+                                existingTorrent.indexer.length ||
+                            mergedLinks.length > existingLinks.length
                         ) {
                             await Torrent.findByIdAndUpdate(
                                 existingTorrent._id,
-                                { indexer: updatedIndexers, rank: torrent.rank }
+                                updateData
                             );
                         }
                     } else {

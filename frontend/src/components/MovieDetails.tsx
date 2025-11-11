@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Torrent } from "../types/torrent";
 import { Movie } from "../types/movie";
 import Image from "next/image";
@@ -8,6 +9,8 @@ interface MovieDetailsProps {
 }
 
 export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
+    const [expandedLinks, setExpandedLinks] = useState<{ [key: string]: boolean }>({});
+
     const formatDate = (date: string) => {
         return new Date(date).toLocaleDateString();
     };
@@ -17,6 +20,14 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
         if (bytes === 0) return "0 Byte";
         const i = Math.floor(Math.log(bytes) / Math.log(1024));
         return Math.round(bytes / Math.pow(1024, i)) + " " + sizes[i];
+    };
+
+    // Use a unique key for each torrent card (movieId-releaseGroup-index)
+    const toggleLinksExpanded = (key: string) => {
+        setExpandedLinks((prev) => ({
+            ...prev,
+            [key]: !prev[key],
+        }));
     };
 
 
@@ -97,11 +108,13 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                         Available Releases
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                        {sortedTorrents.map((torrent) => (
-                            <div
-                                key={`${torrent.movieId}-${torrent.releaseGroup}`}
-                                className="bg-gray-800 rounded-lg p-4 border border-gray-700 flex flex-col"
-                            >
+                        {sortedTorrents.map((torrent, idx) => {
+                            const cardKey = `${torrent.movieId}-${torrent.releaseGroup}-${idx}`;
+                            return (
+                                <div
+                                    key={cardKey}
+                                    className="bg-gray-800 rounded-lg p-4 border border-gray-700 flex flex-col relative"
+                                >
                                 <div className="flex-1">
                                     <div className="space-y-4">
                                         <div>
@@ -207,15 +220,29 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                                 </div>
 
                                 {/* Bottom Actions */}
-                                <div className="mt-4 pt-4 border-t border-gray-700">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <a
-                                            href={torrent.magnetLink}
-                                            className="text-xl hover:opacity-80 transition-opacity"
-                                            title="Download Magnet"
-                                        >
-                                            🧲
-                                        </a>
+                                <div className="mt-4 pt-4 border-t border-gray-700 relative">
+                                    {/* Hide buttons and indexers when links are expanded */}
+                                    <div className={`flex items-center justify-between gap-2 transition-opacity duration-200 ${expandedLinks[cardKey] && torrent.links.length > 0 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}> 
+                                        <div className="flex items-center gap-2">
+                                            {torrent.magnetLink && (
+                                                <a
+                                                    href={torrent.magnetLink}
+                                                    className="text-xl hover:opacity-80 transition-opacity"
+                                                    title="Download Magnet"
+                                                >
+                                                    🧲
+                                                </a>
+                                            )}
+                                            {torrent.links.length > 0 && (
+                                                <button
+                                                    onClick={() => toggleLinksExpanded(cardKey)}
+                                                    className="text-xl hover:opacity-80 transition-opacity"
+                                                    title="View Links"
+                                                >
+                                                    🔗
+                                                </button>
+                                            )}
+                                        </div>
                                         <div
                                             className="text-xs text-gray-400 truncate"
                                             title={torrent.indexer.join(", ")}
@@ -223,9 +250,41 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                                             {torrent.indexer.join(", ")}
                                         </div>
                                     </div>
+                                    {/* Animated links section, overlays bottom actions fully */}
+                                    <div
+                                        className={`overflow-hidden transition-all duration-300 ease-in-out w-full left-0 ${expandedLinks[cardKey] && torrent.links.length > 0 ? 'absolute bottom-0 bg-gray-800 shadow-lg z-10 border-t border-gray-600 pt-3 mt-3 max-h-60 opacity-100 space-y-2' : 'absolute bottom-0 max-h-0 opacity-0'} `}
+                                        style={{ minHeight: expandedLinks[cardKey] && torrent.links.length > 0 ? undefined : 0 }}
+                                    >
+                                        {expandedLinks[cardKey] && torrent.links.length > 0 && (
+                                            <div className="p-4 relative">
+                                                {/* Close button top right */}
+                                                <button
+                                                    onClick={() => toggleLinksExpanded(cardKey)}
+                                                    className="absolute top-2 right-2 text-gray-400 hover:text-red-400 text-lg font-bold focus:outline-none"
+                                                    title="Close"
+                                                >
+                                                    ×
+                                                </button>
+                                                <div className="mb-2"></div>
+                                                {torrent.links.map((link, idx) => (
+                                                    <a
+                                                        key={idx}
+                                                        href={link.guid}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-2 text-gray-400 hover:text-blue-300 transition-colors whitespace-nowrap truncate"
+                                                    >
+                                                        <span className="flex-shrink-0">🔗</span>
+                                                        <span className="truncate">{link.indexer}</span>
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        ))}
+                );
+            })}
                     </div>
                 </div>
             </div>

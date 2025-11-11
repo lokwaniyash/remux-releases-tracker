@@ -23,6 +23,8 @@ export interface ParsedTorrent {
     releaseGroup?: string;
     size?: number;
     magnetLink?: string;
+    links?: { indexer: string; guid: string }[];
+    fileName?: string;
     firstSeen?: Date;
     visualTags?: VisualTag[];
     audioTags?: string[];

@@ -23,7 +23,8 @@ export interface Torrent {
     encode?: Encode;
     releaseGroup: string;
     size: number;
-    magnetLink: string;
+    magnetLink?: string;
+    links: { indexer: string; guid: string }[];
     firstSeen: string;
     visualTags: VisualTag[];
     audioTags: string[];

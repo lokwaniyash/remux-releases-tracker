@@ -19,7 +19,7 @@ export async function setupRssFeed() {
             {
                 params: {
                     apikey: process.env.JACKETT_API_KEY,
-                    Category: ["2000", "2045"], // Movie categories
+                    Category: ["2000", "2045"],
                 },
             }
         );
@@ -29,23 +29,18 @@ export async function setupRssFeed() {
             items.push(
                 ...response.data.Results.map((item: any) => ({
                     title: item.Title,
-                    link: item.MagnetUri || item.Link,
+                    magnetUri: item.MagnetUri,
+                    guid: item.Guid,
                     size: item.Size,
-                    jackettindexer: { id: item.Tracker },
-                }))
-            );
-
-            const indexerItems = response.data?.channel?.item || [];
-            items.push(
-                ...indexerItems.map((item: any) => ({
-                    ...item,
-                    jackettindexer: { id: item.id },
+                    tracker: item.Tracker,
                 }))
             );
         }
+
         for (const item of items) {
             const parsedInfo = parseTorrentFilename(item.title);
             if (parsedInfo.quality !== "BluRay REMUX") continue;
+
             for (const movie of notFullyRemuxedMovies) {
                 if (
                     item.title
@@ -53,58 +48,91 @@ export async function setupRssFeed() {
                         .includes(movie.title.toLowerCase()) &&
                     item.title.includes(movie.year.toString())
                 ) {
-                    const torrent = {
+                    const torrentData: any = {
                         movieId: movie.tmdbId,
-                        indexer: [item.jackettindexer?.id || "Unknown"],
+                        indexer: [item.tracker || "Unknown"],
                         resolution: parsedInfo.resolution,
                         quality: parsedInfo.quality,
                         encode: parsedInfo.encode,
                         releaseGroup: parsedInfo.releaseGroup || "Unknown",
                         size: parseInt(item.size),
-                        magnetLink: item.link,
                         fileName: item.title,
                         firstSeen: new Date(),
                         visualTags: parsedInfo.visualTags || [],
                         audioTags: parsedInfo.audioTags || [],
                         audioChannels: parsedInfo.audioChannels || [],
                         languages: parsedInfo.languages || [],
+                        links: [],
                     };
 
+                    if (item.magnetUri) {
+                        torrentData.magnetLink = item.magnetUri;
+                    } else if (item.guid) {
+                        torrentData.links.push({
+                            indexer: item.tracker || "Unknown",
+                            guid: item.guid,
+                        });
+                    }
 
-                    const [rankedTorrent] = rankTorrents([torrent]);
+                    const [rankedTorrent] = rankTorrents([torrentData]);
 
                     try {
                         const existingTorrent = await Torrent.findOne({
-                            movieId: torrent.movieId,
-                            releaseGroup: torrent.releaseGroup,
-                            resolution: torrent.resolution,
-                            quality: torrent.quality,
-                            encode: torrent.encode,
+                            movieId: torrentData.movieId,
+                            releaseGroup: torrentData.releaseGroup,
+                            resolution: torrentData.resolution,
+                            quality: torrentData.quality,
+                            encode: torrentData.encode,
                         });
 
                         if (existingTorrent) {
                             const updatedIndexers = Array.from(
                                 new Set([
                                     ...(existingTorrent.indexer || []),
-                                    ...(torrent.indexer || []),
+                                    ...(torrentData.indexer || []),
                                 ])
                             );
 
+                            const existingLinks = existingTorrent.links || [];
+                            const newLinks = torrentData.links || [];
+                            const mergedLinks = [
+                                ...existingLinks,
+                                ...newLinks.filter(
+                                    (nl: any) =>
+                                        !existingLinks.some(
+                                            (el: any) =>
+                                                el.indexer === nl.indexer &&
+                                                el.guid === nl.guid
+                                        )
+                                ),
+                            ];
+
+                            const updateData: any = {
+                                indexer: updatedIndexers,
+                                rank: rankedTorrent.rank,
+                                links: mergedLinks,
+                            };
+
+                            if (
+                                torrentData.magnetLink &&
+                                !existingTorrent.magnetLink
+                            ) {
+                                updateData.magnetLink = torrentData.magnetLink;
+                            }
+
                             if (
                                 updatedIndexers.length >
-                                existingTorrent.indexer.length
+                                    existingTorrent.indexer.length ||
+                                mergedLinks.length > existingLinks.length
                             ) {
                                 await Torrent.findByIdAndUpdate(
                                     existingTorrent._id,
-                                    {
-                                        indexer: updatedIndexers,
-                                        rank: rankedTorrent.rank,
-                                    }
+                                    updateData
                                 );
                             }
                         } else {
                             await Torrent.create({
-                                ...torrent,
+                                ...torrentData,
                                 rank: rankedTorrent.rank,
                             });
                         }
