@@ -57,7 +57,7 @@ const REGEXES = {
         "10bit": /10[\s\._-]?bit/i,
     },
     releaseGroup:
-        /(?:-| )(?!\d+$|S\d+|\d+x|ep?\d+)([^\-. \[\()]+)(?=(?:\.[a-z]{2,4})?$|$)/i,
+        /[-\s]([A-Za-z]+(?:[.\s][A-Za-z]+)*)(?=$|\.[a-z0-9]{2,4}$)/i,
 };
 
 function matchSingle(
@@ -83,7 +83,7 @@ function matchMultiple(
 
 export function parseTorrentFilename(filename: string): ParsedTorrent {
     const result: ParsedTorrent = {};
-    let fname = filename.replace(/\.[a-zA-Z0-9]{2,4}$/, "");
+    let fname = filename.replace(/\.(mp4|avi|mov|wmv|flv|mkv|webm|3gp|mpeg|mpg|vob|iso)$/, "");
 
     const rg_match = REGEXES.releaseGroup.exec(fname);
     result.releaseGroup = rg_match ? rg_match[1] : undefined;

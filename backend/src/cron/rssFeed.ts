@@ -70,7 +70,7 @@ export async function setupRssFeed() {
                         languages: parsedInfo.languages || [],
                     };
 
-                    // Calculate rank using rankTorrents function
+
                     const [rankedTorrent] = rankTorrents([torrent]);
 
                     try {

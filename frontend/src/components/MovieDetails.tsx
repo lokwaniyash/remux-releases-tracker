@@ -19,7 +19,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
         return Math.round(bytes / Math.pow(1024, i)) + " " + sizes[i];
     };
 
-    // Sort torrents by rank (highest first)
+
     const sortedTorrents = [...torrents].sort((a, b) => {
         const rankA = a.rank || 0;
         const rankB = b.rank || 0;
@@ -37,7 +37,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
                             alt={movie.title}
                             width={300}
                             height={450}
-                            className="rounded-lg shadow-lg w-full"
+                            className="rounded-lg w-full"
                         />
                     ) : (
                         <div className="w-full aspect-[2/3] bg-gray-800 rounded-lg flex items-center justify-center">
@@ -69,7 +69,7 @@ export default function MovieDetails({ movie, torrents }: MovieDetailsProps) {
             </div>
 
             {/* Torrents */}
-            <div className="bg-gray-900 rounded-lg shadow-xl p-6">
+            <div className="bg-gray-900 rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-6 text-gray-200">
                     Available Releases
                 </h2>

@@ -114,7 +114,7 @@ export default function MovieList({ movies }: MovieListProps) {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto bg-gray-900 rounded-lg shadow">
+            <div className="overflow-x-auto bg-gray-900 rounded-lg">
                 <table className="min-w-full">
                     <thead>
                         <tr className="border-b border-gray-800">
